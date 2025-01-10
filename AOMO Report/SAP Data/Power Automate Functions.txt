@@ -1,0 +1,82 @@
+## Main 
+
+SET CurrentDate TO $fx'=Text(Today(), "MM/dd/yyyy")'
+SET DayOfWeek TO $fx'=Weekday(Today())'
+IF $fx'=DayOfWeek = 2' THEN
+    SET PrevDate TO $fx'=Text(DateAdd(CurrentDate, -3, TimeUnit.Days), "MM/dd/yyyy")'
+ELSE
+    SET PrevDate TO $fx'=Text(DateAdd(CurrentDate, -1, TimeUnit.Days), "MM/dd/yyyy")'
+END
+System.RunApplication.RunApplication ApplicationPath: $fx'"C:\\Users\\koichik\\Documents\\Scripts\\AOMO script\\dist\\rename.exe"' WorkingDirectory: $fx'C:\\Users\\koichik\\Documents\\Scripts\\AOMO script\\dist' WindowStyle: System.ProcessWindowStyle.Normal
+SAP.SapLogin.SapLogInOptionSingle Description: $fx'SMC ECC 6.0 PRD' Client: $fx'100' Username: $fx'UZ****' Password: P'AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAASu4HkuAdwEqFEfXBcVM8hwQAAAACAAAAAAAQZgAAAAEAACAAAADYBaogDvXunWuWY31bOOmITS39L4a39JB+SLXJTwvZ0QAAAAAOgAAAAAIAACAAAACWTQFq9qGtaT1Er+FPPjyjzgoeK8ETxthCBVzbRVqpNiAAAAD0EgPs1tq8ZISUbXwcmoUc7IHDUiaO6/m1IYiHT+FV3UAAAADCQ8lmyDJElChcrudIPBA0Q3R2R3gc0QfIMwQXAkeYIO+pA51IQkWEzyaucy+TdSlfpZ+v0Jymq54q7c39non2' Language: $fx'EN' SapInstance=> SapInstance OtherSapLoginTerminated=> OtherSapLoginTerminated
+CALL MB25
+CALL MB51
+SAP.CloseSapConnection SapInstance: $fx'=SapInstance'
+IF $fx'=IrregularWeek = false' THEN
+    System.RunApplication.RunApplication ApplicationPath: $fx'"C:\\Users\\koichik\\Documents\\Scripts\\aomoXL\\dist\\aomoXL.exe"' WorkingDirectory: $fx'C:\\Users\\koichik\\Documents\\Scripts\\aomoXL\\dist' WindowStyle: System.ProcessWindowStyle.Normal
+END
+
+
+## MB25
+
+SAP.StartTransaction SapInstance: $fx'=SapInstance' TransactionCode: $fx'MB25'
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[0]/tbar[1]/btn[17]'
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/usr/txtV-LOW' TextValue: $fx'MO CHECKER' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/usr/txtENAME-LOW' TextValue: $fx'US2990' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/tbar[0]/btn[8]'
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[0]/usr/ctxtALV_DEF' TextValue: $fx'/CINDYC' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+DISABLE SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[0]/usr/ctxtBDTER-LOW' TextValue: $fx'=PrevDate' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[0]/usr/ctxtBDTER-HIGH' TextValue: $fx'=CurrentDate' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[0]/tbar[1]/btn[8]'
+@@copilotGeneratedAction: 'False'
+Scripting.RunVBScript.RunVBScript VBScriptCode: $fx'\' Connect to SAP session
+Set SapGuiAuto = GetObject("SAPGUI")
+Set Application = SapGuiAuto.GetScriptingEngine
+Set Connection = Application.Children(0)
+Set Session = Connection.Children(0)
+
+session.findById("wnd[0]").maximize
+session.findById("wnd[0]/mbar/menu[0]/menu[1]/menu[1]").select
+'
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/usr/ctxtDY_PATH' TextValue: $fx'C:\\Users\\koichik\\Documents\\Assignments\\REPORTS - Cindy\\AO MO Report\\' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/usr/ctxtDY_FILENAME' TextValue: $fx'MB25 Backorders.XLSX' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/tbar[0]/btn[11]'
+WAIT (UIAutomation.WaitForWindow.ToOpenByTitleClass Title: $fx'MB25 Backorders - Excel' Class: $fx'XLMAIN' FocusWindow: False)
+UIAutomation.CloseWindow.CloseByTitleClass Title: $fx'MB25 Backorders - Excel' Class: $fx'XLMAIN'
+
+
+## MB51
+
+SAP.AttachToRunning.AttachToRunningSapByActiveSession SapInstance=> SapInstance
+SET CurrentDate TO $fx'=Text(Today(), "MM/dd/yyyy")'
+SET DayOfWeek TO $fx'=Weekday(Today())'
+IF $fx'=DayOfWeek = 2' THEN
+    SET PrevDate TO $fx'=Text(DateAdd(CurrentDate, -3, TimeUnit.Days), "MM/dd/yyyy")'
+ELSE
+    SET PrevDate TO $fx'=Text(DateAdd(CurrentDate, -1, TimeUnit.Days), "MM/dd/yyyy")'
+END
+SAP.StartTransaction SapInstance: $fx'=SapInstance' TransactionCode: $fx'MB51'
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[0]/tbar[1]/btn[17]'
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/usr/txtV-LOW' TextValue: $fx'MB51 CHECKER' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/usr/txtENAME-LOW' TextValue: $fx'US2990' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/tbar[0]/btn[8]'
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[0]/usr/ctxtBUDAT-LOW' TextValue: $fx'=PrevDate' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[0]/usr/ctxtBUDAT-HIGH' TextValue: $fx'=CurrentDate' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[0]/tbar[1]/btn[8]'
+@@copilotGeneratedAction: 'False'
+Scripting.RunVBScript.RunVBScript VBScriptCode: $fx'\' Connect to SAP session
+Set SapGuiAuto = GetObject("SAPGUI")
+Set Application = SapGuiAuto.GetScriptingEngine
+Set Connection = Application.Children(0)
+Set Session = Connection.Children(0)
+
+session.findById("wnd[0]").maximize
+session.findById("wnd[0]/mbar/menu[0]/menu[1]/menu[1]").select
+'
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/usr/ctxtDY_PATH' TextValue: $fx'C:\\Users\\koichik\\Documents\\Assignments\\REPORTS - Cindy\\AO MO Report\\' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/usr/ctxtDY_FILENAME' TextValue: $fx'MB51.XLSX' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: $fx'=SapInstance' ElementId: $fx'/app/con[0]/ses[0]/wnd[1]/tbar[0]/btn[11]'
+WAIT (UIAutomation.WaitForWindow.ToOpenByTitleClass Title: $fx'MB51 - Excel' Class: $fx'XLMAIN' FocusWindow: False)
+UIAutomation.CloseWindow.CloseByTitleClass Title: $fx'MB51 - Excel' Class: $fx'XLMAIN'
+
+
