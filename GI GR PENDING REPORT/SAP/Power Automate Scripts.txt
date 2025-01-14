@@ -1,0 +1,88 @@
+// MAIN
+
+DateTime.GetCurrentDateTime.Local DateTimeFormat: DateTime.DateTimeFormat.DateOnly CurrentDateTime=> CurrentDateTime
+DateTime.Add DateTime: $'''%CurrentDateTime.Month%/%CurrentDateTime.Day%/%CurrentDateTime.Year%''' TimeToAdd: -1 TimeUnit: DateTime.TimeUnit.Days ResultedDate=> PrevDay
+SAP.SapLogin.SapLogInOptionSingle Description: $'''SMC ECC 6.0 PRD''' Client: 100 Username: $'''UZ0158''' Password: P'AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAASu4HkuAdwEqFEfXBcVM8hwQAAAACAAAAAAAQZgAAAAEAACAAAACmIpY71NoBT9lPuQ7cCdVnIrV5nQ60YI+3BnTq4z6tSQAAAAAOgAAAAAIAACAAAADaM9XtPgeXTxDPseh41H+yUSspX7M+7SlBvAA0ohns4CAAAADddda39/nvUQY8lwAxgZLgY86XFuj4yh+AV0Gu5Gb+dEAAAAAIDchxzjcBl/1fernO+EazpLIQvCgn0e3xBUSJA/MjliQFkQJv274AniGaLw4w60xkMGi/YjNkXGi3hAXJkCXM' Language: $'''EN''' SapInstance=> SapInstance OtherSapLoginTerminated=> OtherSapLoginTerminated
+CALL 'GI INBOUND'
+CALL 'GI OUTBOUND'
+CALL 'DAILY Z15'
+SAP.CloseSapConnection SapInstance: SapInstance
+
+
+// GI INBOUND
+
+SAP.StartTransaction SapInstance: SapInstance TransactionCode: $'''ZMM018'''
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[0]/tbar[1]/btn[17]'''
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/txtENAME-LOW''' TextValue: $'''US2990''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/txtV-LOW''' TextValue: $'''GI INBOUND''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/tbar[0]/btn[8]'''
+DISABLE SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[0]/usr/ctxtS_GBLDAT-LOW''' TextValue: PrevDay PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[0]/usr/ctxtS_GBLDAT-HIGH''' TextValue: $'''%CurrentDateTime.Month%/%CurrentDateTime.Day%/%CurrentDateTime.Year%''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[0]/tbar[1]/btn[8]'''
+@@copilotGeneratedAction: 'False'
+Scripting.RunVBScript.RunVBScript VBScriptCode: $'''\' Connect to SAP session
+Set SapGuiAuto = GetObject(\"SAPGUI\")
+Set Application = SapGuiAuto.GetScriptingEngine
+Set Connection = Application.Children(0)
+Set Session = Connection.Children(0)
+
+session.findById(\"wnd[0]\").maximize
+session.findById(\"wnd[0]/mbar/menu[0]/menu[3]/menu[1]\").select
+''' ScriptOutput=> VBScriptOutput
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/ctxtDY_PATH''' TextValue: $'''C:\\Users\\koichik\\Documents\\Assignments\\REPORTS - Cindy\\PENDING GI REPORT\\''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/ctxtDY_FILENAME''' TextValue: $'''INBOUND.XLSX''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/tbar[0]/btn[11]'''
+WAIT (UIAutomation.WaitForWindow.ToOpenByTitleClass Title: $'''INBOUND - Excel''' Class: $'''XLMAIN''' FocusWindow: False)
+UIAutomation.CloseWindow.CloseByTitleClass Title: $'''INBOUND - Excel''' Class: $'''XLMAIN'''
+
+
+// GI OUTBOUND
+
+SAP.StartTransaction SapInstance: SapInstance TransactionCode: $'''ZMM018'''
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[0]/tbar[1]/btn[17]'''
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/txtENAME-LOW''' TextValue: $'''US2990''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/txtV-LOW''' TextValue: $'''GI OUTBOUND''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/tbar[0]/btn[8]'''
+DISABLE SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[0]/usr/ctxtS_GBLDAT-LOW''' TextValue: PrevDay PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[0]/usr/ctxtS_GBLDAT-HIGH''' TextValue: $'''%CurrentDateTime.Month%/%CurrentDateTime.Day%/%CurrentDateTime.Year%''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[0]/tbar[1]/btn[8]'''
+@@copilotGeneratedAction: 'False'
+Scripting.RunVBScript.RunVBScript VBScriptCode: $'''\' Connect to SAP session
+Set SapGuiAuto = GetObject(\"SAPGUI\")
+Set Application = SapGuiAuto.GetScriptingEngine
+Set Connection = Application.Children(0)
+Set Session = Connection.Children(0)
+
+session.findById(\"wnd[0]\").maximize
+session.findById(\"wnd[0]/mbar/menu[0]/menu[3]/menu[1]\").select
+''' ScriptOutput=> VBScriptOutput
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/ctxtDY_PATH''' TextValue: $'''C:\\Users\\koichik\\Documents\\Assignments\\REPORTS - Cindy\\PENDING GI REPORT\\''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/ctxtDY_FILENAME''' TextValue: $'''OUTBOUND.XLSX''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/tbar[0]/btn[11]'''
+WAIT (UIAutomation.WaitForWindow.ToOpenByTitleClass Title: $'''OUTBOUND - Excel''' Class: $'''XLMAIN''' FocusWindow: False)
+UIAutomation.CloseWindow.CloseByTitleClass Title: $'''OUTBOUND - Excel''' Class: $'''XLMAIN'''
+
+
+// DAILY Z15
+
+SAP.StartTransaction SapInstance: SapInstance TransactionCode: $'''MB51'''
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[0]/tbar[1]/btn[17]'''
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/txtENAME-LOW''' TextValue: $'''US2990''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/txtV-LOW''' TextValue: $'''DAILY Z15''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/tbar[0]/btn[8]'''
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[0]/usr/ctxtBUDAT-LOW''' TextValue: $'''%CurrentDateTime.Month%/%CurrentDateTime.Day%/%CurrentDateTime.Year%''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[0]/tbar[1]/btn[8]'''
+@@copilotGeneratedAction: 'False'
+Scripting.RunVBScript.RunVBScript VBScriptCode: $'''\' Connect to SAP session
+Set SapGuiAuto = GetObject(\"SAPGUI\")
+Set Application = SapGuiAuto.GetScriptingEngine
+Set Connection = Application.Children(0)
+Set Session = Connection.Children(0)
+
+session.findById(\"wnd[0]\").maximize
+session.findById(\"wnd[0]/mbar/menu[0]/menu[1]/menu[1]\").select''' ScriptOutput=> VBScriptOutput
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/ctxtDY_PATH''' TextValue: $'''C:\\Users\\koichik\\Documents\\Assignments\\REPORTS - Cindy\\PENDING GI REPORT\\''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/usr/ctxtDY_FILENAME''' TextValue: $'''MB51 Z15.XLSX''' PopulateTextFieldMode: SAP.PopulateTextFieldMode.Replace
+SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/tbar[0]/btn[11]'''
+WAIT (UIAutomation.WaitForWindow.ToOpenByTitleClass Title: $'''MB51 Z15 - Excel''' Class: $'''XLMAIN''' FocusWindow: False)
+UIAutomation.CloseWindow.CloseByTitleClass Title: $'''MB51 Z15 - Excel''' Class: $'''XLMAIN'''

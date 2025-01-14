@@ -2,10 +2,17 @@ import win32com.client as win32
 from datetime import datetime
 import shutil
 import os
+import json
+
+with open('config.json') as config_file:
+    config = json.load(config_file)
+
+engine = config["engine"]
+backup = config["backup"]
 
 # Define the source file path and the destination directory
-source_file = r'C:\\Users\koichik\Documents\Assignments\REPORTS - Cindy\AO MO Report\2025 - AO MO CHECKER v7.xlsx'
-destination_folder = r'C:\\Users\koichik\Documents\Assignments\REPORTS - Cindy\AO MO Report\Backups'
+source_file = engine
+destination_folder = backup
 
 # Get the current date and format it as YYYYMMDD
 current_date = datetime.now().strftime("%m%d%Y")
@@ -26,7 +33,7 @@ excel = win32.Dispatch('Excel.Application')
 excel.Visible = False
 
 # Open the workbook
-file_path = r"C:\\Users\koichik\Documents\Assignments\REPORTS - Cindy\AO MO Report\2025 - AO MO CHECKER v7.xlsx"
+file_path = engine
 workbook = excel.Workbooks.Open(file_path)
 
 workbook.RefreshAll()
