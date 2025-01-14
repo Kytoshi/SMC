@@ -10,6 +10,8 @@
 
 - 39DRExtract.py
 
+- config.json (not included)
+
 ---
 
 ### GI GR PENDING REPORT
