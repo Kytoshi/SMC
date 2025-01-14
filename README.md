@@ -45,3 +45,31 @@
 - Rename.py
 
 - config.json (not included)
+
+## Tools
+
+### AutoKeyer
+
+**Description:** tool to automate physical count keying in based off excel sheet to increase efficency
+
+**<u>Files:</u>**
+
+- AutoKey.py
+
+    - Asks for an input excel file, sheet name, and starting cell of the table you are inputing
+
+- minus1.py
+
+    - If a mistake was made in the key program, to reset the list, replaces all boxes with "-1" as it is a number that can be replaced without popping up a error message.
+         
+    - Once minus1.py has run, you can use the AutoKey.py script again.
+
+---
+
+### Excel Converter
+
+**Description:** Helper script which if a file is downloaded as a xls file instead of a xlsx file, will convert multiple files at the same time from a xls to a xlsx file.
+
+**<u>Files:</u>**
+
+- excelConverter.py
