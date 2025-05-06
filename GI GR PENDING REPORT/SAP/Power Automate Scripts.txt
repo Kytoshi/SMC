@@ -86,3 +86,4 @@ SAP.PopulateTextField SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]
 SAP.ClickSapGuiElement.BasicElementSelected SapInstance: SapInstance ElementId: $'''/app/con[0]/ses[0]/wnd[1]/tbar[0]/btn[11]'''
 WAIT (UIAutomation.WaitForWindow.ToOpenByTitleClass Title: $'''MB51 Z15 - Excel''' Class: $'''XLMAIN''' FocusWindow: False)
 UIAutomation.CloseWindow.CloseByTitleClass Title: $'''MB51 Z15 - Excel''' Class: $'''XLMAIN'''
+ 
