@@ -14,8 +14,9 @@ from pynput import keyboard
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
-global stop_flag, entryVar, labelVar, cellVar, pathVar, sheetVar
+global stop_flag, entryVar, labelVar, cellVar, pathVar, sheetVar, validExcel
 stop_flag = False
+validExcel = []
 
 ##### Clear Page Configuration #####
 """ Page for the clearing function input """
@@ -43,14 +44,14 @@ class ClearPage(ctk.CTkFrame):
 
         # BACK BUTTON ---
 
-        back_default_img = ImageTk.PhotoImage(Image.open("components/defaultback.png").resize((60, 60), Image.Resampling.BICUBIC))
+        # back_default_img = ImageTk.PhotoImage(Image.open("components/defaultback.png").resize((60, 60), Image.Resampling.BICUBIC))
         
         self.back_button = ctk.CTkButton(self, 
-            image=back_default_img, 
+            # image=back_default_img, 
             width=40, height=40,
             text="",
-            fg_color="transparent",
-            hover_color="#ECEFCA",
+            # fg_color="transparent",
+            # hover_color="#ECEFCA",
             command=lambda: self.backhome()
             )
         self.back_button.place(relx=0.1, rely=0.2, anchor=CENTER)
@@ -251,17 +252,21 @@ class KeyPage(ctk.CTkFrame):
             )
         self.title2.place(relx=0.5, rely=0.2, anchor=CENTER)
 
-        self.back_default_img = ImageTk.PhotoImage(Image.open("components/defaultback.png").resize((60, 60), Image.Resampling.BICUBIC))
+        # self.back_default_img = ImageTk.PhotoImage(Image.open("components/defaultback.png").resize((60, 60), Image.Resampling.BICUBIC))
         
         self.key_page_button = ctk.CTkButton(self, 
-            image=self.back_default_img, 
+            # image=self.back_default_img, 
+
             width=40, height=40,
             text="",
-            fg_color="transparent",
-            hover_color="#ECEFCA",
-            command=lambda: controller.show_page("Home")
+            # fg_color="transparent",
+            # hover_color="#ECEFCA",
+            command=lambda: self.backhome()
             )
         self.key_page_button.place(relx=0.1, rely=0.2, anchor=CENTER)
+
+        self.file_path_text = ctk.CTkLabel(self, text="Excel File Path:", font=("Arial", 15, "bold"), text_color="#213448")
+        self.file_path_text.place(relx=0.3, rely=0.4, anchor=CENTER)
 
         self.file_path_entry = ctk.CTkEntry(self, 
             placeholder_text="Enter Excel File Path...", 
@@ -279,13 +284,19 @@ class KeyPage(ctk.CTkFrame):
         )
         self.browse_button.pack(padx=(0, 0), side=ctk.LEFT)
 
+        self.startingcell_text = ctk.CTkLabel(self, text="Starting Cell:", font=("Arial", 15, "bold"), text_color="#213448")
+        self.startingcell_text.place(relx=0.285, rely=0.62, anchor=CENTER)
+
         self.cell_entry = ctk.CTkEntry(self,
             placeholder_text="Enter Starting Cell (Ex. C2)", 
             width=55, 
             height=40, 
             textvariable=cellVar
             )
-        self.cell_entry.place(relx=0.26, rely=0.62, anchor=CENTER)
+        self.cell_entry.place(relx=0.4, rely=0.62, anchor=CENTER)
+
+        self.sheet_text = ctk.CTkLabel(self, text="Sheet Name:", font=("Arial", 15, "bold"), text_color="#213448")
+        self.sheet_text.place(relx=0.56, rely=0.62, anchor=CENTER)
 
         self.sheet_entry = ctk.CTkEntry(self,
             placeholder_text="Enter Sheet Name (Ex. Sheet1)", 
@@ -293,16 +304,110 @@ class KeyPage(ctk.CTkFrame):
             height=40, 
             textvariable=sheetVar
             )
-        self.sheet_entry.place(relx=0.65, rely=0.62, anchor=CENTER)
+        self.sheet_entry.place(relx=0.71, rely=0.62, anchor=CENTER)
 
         self.begin_keying_button = ctk.CTkButton(self,
             text="Confirm", 
             font=("Arial", 17, "bold"), 
             width=200, 
             height=40, 
-            command=lambda: self.controller.show_page("countDown2")
+            command=lambda: self.validate_input()
         )
         self.begin_keying_button.place(relx=0.5, rely=0.8, anchor=CENTER)
+
+        self.error_text = ctk.CTkLabel(self, text="No Data Found", font=("Arial", 15, "bold"), text_color="red")
+        self.error_text.place(relx=0.5, rely=0.71, anchor=CENTER)
+        self.error_text.lower()
+
+    def backhome(self):
+        """Return to Home and reset flags."""
+        cellVar.set("")
+        pathVar.set("")
+        sheetVar.set("")
+        self.error_text.configure(text="VALIDATING DATA...", text_color="#213448")
+        self.error_text.lower()
+        self.controller.show_page("Home")  # Go back to home
+
+    def validate_input(self):
+        global cellVar, sheetVar, pathVar, validExcel
+
+        self.error_text.configure(text="VALIDATING DATA...", text_color="#213448")
+        self.error_text.lift()
+        self.update()
+
+        # Clean up file path (remove any "" if found)
+        excelfile = pathVar.get().replace('"', '')
+        pathVar.set(excelfile)  # Optional: update entry with cleaned path
+
+        cell = cellVar.get()
+        sheet = sheetVar.get()
+
+        # Initialize the container if not already
+        if 'validExcel' not in globals():
+            validExcel = tk.StringVar()
+
+        try:
+            excelValue = self.read_excel_column(excelfile, sheet, cell)
+
+            # Check if excelValue is empty or None
+            if not excelValue or excelValue == ["", None]:
+                self.error_text.configure(text="NO DATA FOUND.", text_color="red")
+                self.error_text.lift()
+                return  # stop execution if invalid
+
+            # Check if all values are valid (non-negative integers)
+            invalid_values = [value for value in excelValue if not isinstance(value, int) or value < 0]
+            if invalid_values:
+                self.error_text.configure(text="NOT VALID ENTRY", text_color="red")
+                self.error_text.lift()
+                return  # stop execution if invalid
+
+            # If validation passed
+            self.error_text.lower()
+            validExcel = excelValue  # Store the validated data
+            self.controller.show_page("countDown2")
+
+            # Clear inputs AFTER validation
+            cellVar.set("")
+            pathVar.set("")
+            sheetVar.set("")
+
+        except Exception as e:
+            print("Validation Error:", e)
+            self.error_text.configure(text=str(e), text_color="red")
+            self.error_text.lift()
+            
+    def read_excel_column(self, file_path, sheet_name, start_cell):
+        """Read values from a column in an Excel file until an empty cell is encountered."""
+        try:
+            print(f"Reading from: {file_path}")
+            workbook = openpyxl.load_workbook(file_path, data_only=True)
+            print(f"Available sheets: {workbook.sheetnames}")
+            
+            if sheet_name not in workbook.sheetnames:
+                raise ValueError(f"Sheet '{sheet_name}' not found.")
+            
+            sheet = workbook[sheet_name]
+
+            from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
+            col_letter, row = coordinate_from_string(start_cell)
+            start_column = column_index_from_string(col_letter)
+            start_row = row
+
+            # Read values from the column
+            values = []
+            for r in range(start_row, sheet.max_row + 1):
+                cell_value = sheet.cell(row=r, column=start_column).value
+                if cell_value is None:
+                    break
+                values.append(cell_value)
+
+            print("Values found:", values)
+            return values  # <--- Important: return the list of values
+
+        except Exception as e:
+            print(f"Error reading Excel file: {e}")
+            return []
 
     def browse_file(self):
         """Opens file dialog and sets the selected path into the entry."""
@@ -408,39 +513,24 @@ class countDownPage2(ctk.CTkFrame):
         self.start_key()
 
     def start_key(self):
-        global cellVar, sheetVar, pathVar, stop_flag
-        excelfile = pathVar.get()
-        cell = cellVar.get()
-        sheet = sheetVar.get()
+        global stop_flag, validExcel
+        values = validExcel
+        validExcel = []
+        for value in values:
+            if stop_flag:
+                print("Process stopped by user.")
+                break
+            print(f"Typing value: {value}")
+            self.type_to_program(value)
+            time.sleep(0.6)
+        
+        if not stop_flag:
+            validExcel = []
+            self.after(1000, self._update_done)  # Update UI after process is done
+        else:
+            validExcel = []
+            self.after(1000, self._update_cancelled)  # Update UI after process is cancelled
 
-        cellVar.set("")  # Clear the entry field after processing
-        pathVar.set("")
-        sheetVar.set("")
-
-        try:
-            # Step 1: Read data from the Excel column
-            values = self.read_excel_column(excelfile, sheet, cell)
-            if not values or values == ["", None]:
-                
-                return
-
-            for value in values:
-                if stop_flag:
-                    print("Process stopped by user.")
-                    break
-                print(f"Typing value: {value}")
-                self.type_to_program(value)
-                time.sleep(0.6)
-            
-            if not stop_flag:
-                self.after(1000, self._update_done)  # Update UI after process is done
-            else:
-                self.after(1000, self._update_cancelled)  # Update UI after process is cancelled
-
-        except Exception as e:
-            self.count.configure(text="No Data Found.", text_color="red")
-            self.cancel_button.lower()  # Hide the cancel button after finishing
-            self.home_button.lift()
         
     def _update_done(self):
         """Update the UI after the clearing process is done."""
@@ -452,25 +542,6 @@ class countDownPage2(ctk.CTkFrame):
         """Update the UI after the clearing process is cancelled."""
         self.count.configure(text="Cancelled", text_color="red")
         self.home_button.lift()  # Show the home button after cancelling
-
-    def read_excel_column(self, file_path, sheet_name, start_cell):
-        """Read values from a column in an Excel file until an empty cell is encountered."""
-        workbook = openpyxl.load_workbook(file_path)
-        sheet = workbook[sheet_name]
-
-        # Determine the starting row and column
-        start_column = openpyxl.utils.cell.column_index_from_string(start_cell[:1])  # Column letter to number
-        start_row = int(start_cell[1:])  # Starting row number
-
-        # Read values from the column
-        values = []
-        for row in range(start_row, sheet.max_row + 1):
-            cell_value = sheet.cell(row=row, column=start_column).value
-            if cell_value is None:  # Stop at the first empty cell
-                break
-            values.append(cell_value)
-
-        return values
 
     def type_to_program(self, data):
         """Type data directly into another program."""
