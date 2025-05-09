@@ -31,52 +31,66 @@ class ClearPage(ctk.CTkFrame):
         entryVar = tk.StringVar()
         labelVar = tk.StringVar()
 
-        self.configure(fg_color="#ECEFCA")
+        self.configure(fg_color="#384959")
 
         title2 = ctk.CTkLabel(self,
-        text="Clearing Page", 
-        font=("Arial", 26, "bold"), 
-        text_color="#213448", 
+        text="C L E A R", 
+        font=("Inter", 26, "bold"), 
+        fg_color="#6A89A7",
+        text_color="white", 
         anchor="center", 
-        width=700
+        width=200,
+        height=50
         )
         title2.place(relx=0.5, rely=0.2, anchor=CENTER)
 
         # BACK BUTTON ---
 
-        # back_default_img = ImageTk.PhotoImage(Image.open("components/defaultback.png").resize((60, 60), Image.Resampling.BICUBIC))
+        back_default_img = ImageTk.PhotoImage(Image.open("components/defaultback.png").resize((30, 30), Image.Resampling.BICUBIC))
         
         self.back_button = ctk.CTkButton(self, 
-            # image=back_default_img, 
-            width=40, height=40,
+            image=back_default_img, 
+            width=20,
+            height=20,
             text="",
-            # fg_color="transparent",
-            # hover_color="#ECEFCA",
+            fg_color="transparent",
+            hover_color="#6A89A7",
             command=lambda: self.backhome()
             )
         self.back_button.place(relx=0.1, rely=0.2, anchor=CENTER)
 
         prompt2 = ctk.CTkLabel(self,
         text="How many boxes do you need to clear?",
-        font=("Arial", 15, "bold"),
-        text_color="#213448",
+        font=("Inter", 15, "bold"),
+        text_color="white",
         anchor="center",
         width=200
         )
-        prompt2.place(relx=0.5, rely=0.3, anchor=CENTER)
+        prompt2.place(relx=0.5, rely=0.35, anchor=CENTER)
 
-        self.clear_entry = ctk.CTkEntry(self, placeholder_text="Enter number of boxes...", width=300, height=40, textvariable=entryVar)
+        self.clear_entry = ctk.CTkEntry(self, 
+            placeholder_text="Enter number of boxes...", 
+            width=300, 
+            height=40, 
+            border_color="#6A89A7", 
+            textvariable=entryVar)
         self.clear_entry.place(relx=0.5, rely=0.45, anchor=CENTER)
-        # clear_entry.bind("<Return>", start_clear)
 
-        begin_clearing_button = ctk.CTkButton(self, text="Confirm", font=("Arial", 17, "bold"), width=200, height=40, command=self.validate_input)
+        begin_clearing_button = ctk.CTkButton(self, 
+            text="Confirm", 
+            font=("Inter", 17, "bold"), 
+            width=200, 
+            height=40,
+            fg_color="#88BDF2",
+            text_color="black", 
+            command=self.validate_input)
         begin_clearing_button.place(relx=0.5, rely=0.65, anchor=CENTER)
 
     def validate_input(self):
         value = entryVar.get()
         try:
             if int(value) > 0:
-                self.clear_entry.configure(border_color="#A9A9A9")  # Reset to default gray
+                self.clear_entry.configure(border_color="#6A89A7")  # Reset to default gray
                 self.controller.show_page("countDown")
             else:
                 raise ValueError
@@ -86,7 +100,7 @@ class ClearPage(ctk.CTkFrame):
     def backhome(self):
             """Return to Home and reset flags."""
             entryVar.set("")  # Clear the entry field
-            self.clear_entry.configure(border_color="#A9A9A9")  # Reset to default gray
+            self.clear_entry.configure(border_color="#6A89A7")  # Reset to default gray
             self.controller.show_page("Home")  # Go back to home
 
 ##### Count Down Page Configuration #####
@@ -99,19 +113,27 @@ class countDownPage(ctk.CTkFrame):
         self.countdown_time = countdown_time
         self._cancelled = False  # Add cancellation flag
 
-        self.configure(fg_color="#ECEFCA")
+        self.configure(fg_color="#384959")
 
-        self.count_text = ctk.CTkLabel(self, text="Starting in", font=("Arial", 26, "bold"), text_color="#213448")
+        self.count_text = ctk.CTkLabel(self, 
+        text="Starting in", 
+        font=("Inter", 26, "bold"), 
+        text_color="White")
         self.count_text.place(relx=0.5, rely=0.3, anchor=CENTER)
 
-        self.count = ctk.CTkLabel(self, text="", font=("Arial", 40, "bold"), text_color="#213448")
+        self.count = ctk.CTkLabel(self, 
+            text="", 
+            font=("Inter", 40, "bold"), 
+            text_color="white")
         self.count.place(relx=0.5, rely=0.4, anchor=CENTER)
 
         # Home button (hidden at start)
         self.home_button = ctk.CTkButton(
             self,
             text="Return to Home",
-            font=("Arial", 17, "bold"),
+            font=("Inter", 17, "bold"),
+            fg_color="#88BDF2",
+            text_color="black",
             width=200,
             height=40,
             command=lambda: self.return_home()  # Use method to return to home
@@ -123,7 +145,9 @@ class countDownPage(ctk.CTkFrame):
         self.cancel_button = ctk.CTkButton(
             self,
             text="Cancel",
-            font=("Arial", 17, "bold"),
+            font=("Inter", 17, "bold"),
+            fg_color="#88BDF2",
+            text_color="black",
             width=200,
             height=40,
             command=self.cancel_countdown  # Cancel countdown
@@ -146,15 +170,15 @@ class countDownPage(ctk.CTkFrame):
         global stop_flag
         stop_flag = False  # Reset stop flag for future runs
         self._cancelled = False  # Reset cancel flag
-        self.count_text.configure(text="Starting in", text_color="#213448")
+        self.count_text.configure(text="Starting in", text_color="white")
         self.controller.show_page("Home")  # Go back to home
 
     def start_countdown(self):
-        self.controller.pages["Clear"].clear_entry.configure(border_color="#A9A9A9")
+        self.controller.pages["Clear"].clear_entry.configure(border_color="#6A89A7")
         self.remaining = self.countdown_time
         self.cancel_button.lift()
         self.home_button.lower()  # Hide button if revisiting
-        self.count.configure(text="", text_color="#213448")
+        self.count.configure(text="", text_color="white")
         self._update_timer()
 
     def _update_timer(self):
@@ -241,31 +265,36 @@ class KeyPage(ctk.CTkFrame):
         cellVar = tk.StringVar()
         sheetVar = tk.StringVar()
 
-        self.configure(fg_color="#ECEFCA")
+        self.configure(fg_color="#384959")
 
         self.title2 = ctk.CTkLabel(self,
-            text="Keying Page", 
-            font=("Arial", 26, "bold"), 
-            text_color="#213448",
+            text="K E Y", 
+            font=("Inter", 26, "bold"), 
+            text_color="white",
+            fg_color="#6A89A7",
             anchor="center",
-            width=700
+            width=200,
+            height=50
             )
         self.title2.place(relx=0.5, rely=0.2, anchor=CENTER)
 
-        # self.back_default_img = ImageTk.PhotoImage(Image.open("components/defaultback.png").resize((60, 60), Image.Resampling.BICUBIC))
+        self.back_default_img = ImageTk.PhotoImage(Image.open("components/defaultback.png").resize((30, 30), Image.Resampling.BICUBIC))
         
         self.key_page_button = ctk.CTkButton(self, 
-            # image=self.back_default_img, 
+            image=self.back_default_img, 
 
-            width=40, height=40,
+            width=20, height=20,
             text="",
-            # fg_color="transparent",
-            # hover_color="#ECEFCA",
+            fg_color="transparent",
+            hover_color="#6A89A7",
             command=lambda: self.backhome()
             )
         self.key_page_button.place(relx=0.1, rely=0.2, anchor=CENTER)
 
-        self.file_path_text = ctk.CTkLabel(self, text="Excel File Path:", font=("Arial", 15, "bold"), text_color="#213448")
+        self.file_path_text = ctk.CTkLabel(self, 
+            text="Excel File Path:", 
+            font=("Inter", 15, "bold"), 
+            text_color="white")
         self.file_path_text.place(relx=0.3, rely=0.4, anchor=CENTER)
 
         self.file_path_entry = ctk.CTkEntry(self, 
@@ -279,12 +308,18 @@ class KeyPage(ctk.CTkFrame):
         self.browse_button = ctk.CTkButton(self, 
             text="Browse...", 
             width=100, 
-            height=40, 
+            height=40,
+            font=("Inter", 12, "bold"),
+            fg_color="#88BDF2",
+            text_color="black",
             command=self.browse_file
         )
         self.browse_button.pack(padx=(0, 0), side=ctk.LEFT)
 
-        self.startingcell_text = ctk.CTkLabel(self, text="Starting Cell:", font=("Arial", 15, "bold"), text_color="#213448")
+        self.startingcell_text = ctk.CTkLabel(self, 
+            text="Starting Cell:", 
+            font=("Inter", 15, "bold"), 
+            text_color="white")
         self.startingcell_text.place(relx=0.285, rely=0.62, anchor=CENTER)
 
         self.cell_entry = ctk.CTkEntry(self,
@@ -295,7 +330,10 @@ class KeyPage(ctk.CTkFrame):
             )
         self.cell_entry.place(relx=0.4, rely=0.62, anchor=CENTER)
 
-        self.sheet_text = ctk.CTkLabel(self, text="Sheet Name:", font=("Arial", 15, "bold"), text_color="#213448")
+        self.sheet_text = ctk.CTkLabel(self, 
+            text="Sheet Name:", 
+            font=("Inter", 15, "bold"), 
+            text_color="white")
         self.sheet_text.place(relx=0.56, rely=0.62, anchor=CENTER)
 
         self.sheet_entry = ctk.CTkEntry(self,
@@ -308,14 +346,16 @@ class KeyPage(ctk.CTkFrame):
 
         self.begin_keying_button = ctk.CTkButton(self,
             text="Confirm", 
-            font=("Arial", 17, "bold"), 
+            font=("Inter", 17, "bold"), 
             width=200, 
-            height=40, 
+            height=40,
+            fg_color="#88BDF2",
+            text_color="black", 
             command=lambda: self.validate_input()
         )
         self.begin_keying_button.place(relx=0.5, rely=0.8, anchor=CENTER)
 
-        self.error_text = ctk.CTkLabel(self, text="No Data Found", font=("Arial", 15, "bold"), text_color="red")
+        self.error_text = ctk.CTkLabel(self, text="No Data Found", font=("Inter", 15, "bold"), text_color="red")
         self.error_text.place(relx=0.5, rely=0.71, anchor=CENTER)
         self.error_text.lower()
 
@@ -324,14 +364,14 @@ class KeyPage(ctk.CTkFrame):
         cellVar.set("")
         pathVar.set("")
         sheetVar.set("")
-        self.error_text.configure(text="VALIDATING DATA...", text_color="#213448")
+        self.error_text.configure(text="VALIDATING DATA...", text_color="white")
         self.error_text.lower()
         self.controller.show_page("Home")  # Go back to home
 
     def validate_input(self):
         global cellVar, sheetVar, pathVar, validExcel
 
-        self.error_text.configure(text="VALIDATING DATA...", text_color="#213448")
+        self.error_text.configure(text="VALIDATING DATA...", text_color="white")
         self.error_text.lift()
         self.update()
 
@@ -425,19 +465,25 @@ class countDownPage2(ctk.CTkFrame):
         self.countdown_time = countdown_time
         self._cancelled = False  # Add cancellation flag
 
-        self.configure(fg_color="#ECEFCA")
+        self.configure(fg_color="#384959")
 
-        self.count_text = ctk.CTkLabel(self, text="Starting in", font=("Arial", 26, "bold"), text_color="#213448")
+        self.count_text = ctk.CTkLabel(self, 
+            text="Starting in", 
+            font=("Inter", 26, "bold"), 
+            text_color="white")
         self.count_text.place(relx=0.5, rely=0.3, anchor=CENTER)
 
-        self.count = ctk.CTkLabel(self, text="", font=("Arial", 40, "bold"), text_color="#213448")
+        self.count = ctk.CTkLabel(self, 
+            text="", 
+            font=("Inter", 40, "bold"), 
+            text_color="#213448")
         self.count.place(relx=0.5, rely=0.4, anchor=CENTER)
 
         # Home button (hidden at start)
         self.home_button = ctk.CTkButton(
             self,
             text="Return to Home",
-            font=("Arial", 17, "bold"),
+            font=("Inter", 17, "bold"),
             width=200,
             height=40,
             command=lambda: self.return_home()  # Use method to return to home
@@ -449,7 +495,9 @@ class countDownPage2(ctk.CTkFrame):
         self.cancel_button = ctk.CTkButton(
             self,
             text="Cancel",
-            font=("Arial", 17, "bold"),
+            font=("Inter", 17, "bold"),
+            fg_color="#88BDF2",
+            text_color="black",
             width=200,
             height=40,
             command=self.cancel_countdown  # Cancel countdown
@@ -474,17 +522,17 @@ class countDownPage2(ctk.CTkFrame):
         global stop_flag
         stop_flag = False  # Reset stop flag for future runs
         self._cancelled = False  # Reset cancel flag
-        self.count_text.configure(text="Starting in", text_color="#213448")
+        self.count_text.configure(text="Starting in", text_color="white")
         self.controller.show_page("Home")  # Go back to home
 
     def start_countdown(self):
-        self.controller.pages["Key"].cell_entry.configure(border_color="#A9A9A9")
-        self.controller.pages["Key"].sheet_entry.configure(border_color="#A9A9A9")
-        self.controller.pages["Key"].file_path_entry.configure(border_color="#A9A9A9")
+        self.controller.pages["Key"].cell_entry.configure(border_color="#6A89A7")
+        self.controller.pages["Key"].sheet_entry.configure(border_color="#6A89A7")
+        self.controller.pages["Key"].file_path_entry.configure(border_color="#6A89A7")
         self.remaining = self.countdown_time
         self.cancel_button.lift()
         self.home_button.lower()  # Hide button if revisiting
-        self.count.configure(text="", text_color="#213448")
+        self.count.configure(text="", text_color="white")
         self._update_timer()
 
     def _update_timer(self):
@@ -497,6 +545,7 @@ class countDownPage2(ctk.CTkFrame):
             if not self._cancelled:
                 self.count_text.configure(text="")
                 self.count.configure(text="Keying has started!")
+                self.count.configure(text_color="white")
                 self.after(500, self.on_key_finished)  # Call on_key_finished after countdown
             else:
                 # If cancelled, stop further action and reset
@@ -559,33 +608,49 @@ class HomePage(ctk.CTkFrame):
         super().__init__(parent)
         self.controller = controller
 
-        self.configure(fg_color="#ECEFCA")
+        self.configure(fg_color="#384959")
 
         title1 = ctk.CTkLabel(self,
-        text="Welcome to the PI Count AutoKey Program", 
-        font=("Arial", 26, "bold"), 
-        text_color="#213448", 
+        text="P I   C O U N T   A U T O K E Y", 
+        font=("Inter", 24, "bold"),
+        text_color="white",
+        bg_color="#6A89A7", 
         anchor="center", 
-        width=700
+        width=450,
+        height= 70
         )
         title1.place(relx=0.5, rely=0.2, anchor=CENTER)
 
         subtitle1 = ctk.CTkLabel(self,
         text="Are You Keying or Clearing?",
-        font=("Arial", 15, "bold"),
-        text_color="#213448",
+        font=("Inter", 15, "bold"),
+        text_color="white",
         anchor="center",
         width=700
         )
         subtitle1.place(relx=0.5, rely=0.33, anchor=CENTER)
 
-        buttons_frame = ctk.CTkFrame(self, fg_color="#ECEFCA", width=400, height=60)
+        buttons_frame = ctk.CTkFrame(self, fg_color="#384959", width=400, height=60)
         buttons_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-        key_page_button = ctk.CTkButton(buttons_frame, text="KEY", font=("Arial", 17, "bold"), width=100, height=50,command=lambda: controller.show_page("Key"))
+        key_page_button = ctk.CTkButton(buttons_frame, 
+            text="KEY", 
+            font=("Inter", 17, "bold"), 
+            width=100, 
+            height=50,
+            fg_color="#88BDF2",
+            text_color="black",
+            command=lambda: controller.show_page("Key"))
         key_page_button.pack(padx=(0,33), side=ctk.LEFT)
         
-        back_button = ctk.CTkButton(buttons_frame, text="CLEAR", font=("Arial", 17, "bold"), width=100, height=50,command=lambda: controller.show_page("Clear"))
+        back_button = ctk.CTkButton(buttons_frame, 
+            text="CLEAR", 
+            font=("Inter", 17, "bold"), 
+            width=100, 
+            height=50,
+            fg_color="#88BDF2",
+            text_color="black",
+            command=lambda: controller.show_page("Clear"))
         back_button.pack(padx=(0,0), side=ctk.RIGHT)
 
 ##### Program Set up #####
