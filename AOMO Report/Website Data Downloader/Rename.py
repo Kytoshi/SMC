@@ -1,4 +1,5 @@
 import time
+from datetime import datetime, timedelta
 import os
 import json
 import glob
@@ -21,6 +22,8 @@ with open('config.json', encoding='utf-8') as config_file:
 # Load from config.json
 file1_delete = config["file1_delete"]
 file2_delete = config["file2_delete"]
+file3_delete = config["file3_delete"]
+file4_delete = config["file4_delete"]
 current_report = config["current_report"]
 loginbttn_id = config["loginbttn_id"]
 link1_id = config["link1_id"]
@@ -39,6 +42,7 @@ view_button_id = config["view_button_id"]
 downloaded1 = config["downloaded1"]
 newdownloaded1 = config["newdownloaded1"]
 downloaded2 = config["downloaded2"]
+downloaded3 = config["downloaded3"]
 website = config["website"]
 
 lock = Lock()
@@ -55,6 +59,18 @@ if os.path.exists(file2_delete):
     print(f"{file2_delete} has been deleted")
 else:
     print(f"The {file2_delete} does not exist")
+
+if os.path.exists(file3_delete):
+    os.remove(file3_delete)
+    print(f"{file3_delete} has been deleted")
+else:
+    print(f"{file3_delete} does not exist")
+
+if os.path.exists(file4_delete):
+    os.remove(file4_delete)
+    print(f"{file4_delete} has been deleted")
+else:
+    print(f"{file4_delete} does not exist")
 
 # Set up Chrome options
 chrome_options = Options()
@@ -93,7 +109,7 @@ def create_driver():
 
 def wait_for_element(driver, by, value, total_wait=480, check_interval=10):
     try:
-        print(f"Waiting for element: {value} for up to {total_wait} seconds...")
+        # print(f"Waiting for element: {value} for up to {total_wait} seconds...")
         element = WebDriverWait(driver, total_wait, check_interval).until(EC.presence_of_element_located((by, value)))
         driver.execute_script("arguments[0].scrollIntoView(true);", element)
         return element
@@ -105,7 +121,7 @@ def click_export_button(driver, button_locator):
     try:
         element = driver.find_element(By.ID, button_locator)
         driver.execute_script("arguments[0].click();", element)
-        print(f"Clicked export button using JavaScript: {button_locator}")
+        # print(f"Clicked export button using JavaScript: {button_locator}")
     except Exception as e:
         print(f"Error clicking export button: {e}")
 
@@ -113,13 +129,27 @@ def process_export_button(driver, window_handle, export_button_locator):
     lock.acquire()
     try:
         driver.switch_to.window(window_handle)
-        print(f"Switched to window: {window_handle}")
+        # print(f"Switched to window: {window_handle}")
         click_export_button(driver, export_button_locator)
-        print(f"Clicked export button in window: {window_handle}")
+        # print(f"Clicked export button in window: {window_handle}")
     except Exception as e:
         print(f"Error processing export button: {e}")
     finally:
         lock.release()
+
+# Helper Function to Subtract One Business Day
+def subtract_one_business_day(date):
+    # Subtract one day
+    date -= timedelta(days=1)
+    
+    # If it's Saturday, go back to Friday
+    if date.weekday() == 5:  # Saturday
+        date -= timedelta(days=1)
+    # If it's Sunday, go back to Friday
+    elif date.weekday() == 6:  # Sunday
+        date -= timedelta(days=2)
+    
+    return date
 
 driver = create_driver()
 driver.set_page_load_timeout(600)
@@ -137,9 +167,11 @@ driver.find_element(By.ID, loginbttn_id).click()
 # Wait for the login to complete
 time.sleep(1)
 
+print("Downloading orders.xls & matshortage.xls...")
+
 # Navigate to the first link
 links = driver.find_elements(By.TAG_NAME, 'a')
-print(f"Navigating to Process DN to GI Page...")
+# print(f"Navigating to Process DN to GI Page...")
 for link in links:
     if link.get_attribute('href') == 'javascript:onClickTaskMenu("DNToGIProcess.asp", 223)':
         link.click()
@@ -148,10 +180,12 @@ for link in links:
 # Open new windows
 driver.get('http://pdbs:17830/FrmMatShortageRpt2.aspx')
 driver.execute_script("window.open('http://pdbs:17830/FrmMatShortageRpt1.aspx', '_blank', 'width=1920,height=1080');")
+
 time.sleep(1)
 
 # Get window handles and switch to the new windows
 window_handles = driver.window_handles
+
 
 # Set date range for the second page
 driver.switch_to.window(window_handles[1])
@@ -181,23 +215,86 @@ thread2.start()
 thread1.join()
 thread2.join()
 
-print("Both export actions completed.")
+print("orders.xls & matshortage.xls have downloaded sucessfully!\n")
+
+# DAILY ORDER STATUS REPORT ( COMPLETED )
+
+print("Downloading Completed Daily Order Status Report...")
+
+driver.get("https://pdbs.supermicro.com:18893/Home")
+
+# Login steps
+# print("Logging in...")
+# username_field = driver.find_element(By.ID, "txtUserName")
+password_field = driver.find_element(By.ID, "xPWD")
+# username_field.send_keys(username)
+password_field.send_keys(password)
+driver.find_element(By.ID, loginbttn_id).click()
+
+# Wait for the login to complete
+time.sleep(1)
+
+# Navigate to Daily Order Status Report Page
+links = driver.find_elements(By.TAG_NAME, 'a')
+# print(f"Navigating to Daily Order Status Report Page...")
+for link in links:
+    if link.get_attribute('href') == 'javascript:onClickTaskMenu("OrdReport.asp", 65)':
+        link.click()
+        break
+
+#Set date for third page (Daily Orders)
+DailyOrders_date_field = wait_for_element(driver, By.NAME, "Date")
+DailyOrders_date_field.clear()
+today = datetime.today()
+prevDate = subtract_one_business_day(today)
+DailyOrders_date_field.send_keys(prevDate.strftime("%m/%d/%Y")) # Sets date to the previous business day
+
+driver.execute_script("ChgDate()")
+
+try:
+    # Find the link by its visible text and click it
+    link = driver.find_element(By.LINK_TEXT, "Order Fulfillment Report")
+    link.click()
+    print("Link clicked successfully!")
+
+except Exception as e:
+    print(f"Error: {e}")
+
+# Wait for the file to appear and be fully downloaded
+timeout = 300  # Set a timeout in seconds (adjust as needed)
+start_time = time.time()
+
+while time.time() - start_time < timeout:
+    files = [f for f in os.listdir(download_path) if f.startswith("DailyReport")]
+    if files:
+        file_path = os.path.join(download_path, files[0])
+        if file_path.endswith(".crdownload") or file_path.endswith(".part"):  # Temporary download files
+            time.sleep(1)  # Wait and check again
+        else:
+            print("Download complete:", file_path)
+            break
+    time.sleep(1)
+else:
+    raise TimeoutError("File download timed out.")
 
 # Initialize Excel application
 excel = win32.Dispatch("Excel.Application")
 
 # Convert MatShortage file(s) with changing numbers
+
+print("Converting xls to xlsx files...")
+
 mat_files = glob.glob(f"{download_path}/{downloaded1}")
 for MatS_path in mat_files:
     MatS_xlsx_path = os.path.splitext(MatS_path)[0] + ".xlsx"
     wb = excel.Workbooks.Open(MatS_path)
     wb.SaveAs(MatS_xlsx_path, FileFormat=51)
     wb.Close()
-    print(f"MatShortage file converted to: {MatS_xlsx_path}")
+    print(f"MatShortage file converted to xlsx format.")
 
     if os.path.exists(MatS_path):
         os.remove(MatS_path)
-        print(f"Original file {MatS_path} deleted after conversion")
+        print(f"Original matshortage.xls file has been deleted after conversion...")
 
 # Rename the most recent .xlsx file if necessary
 if mat_files:
@@ -206,7 +303,7 @@ if mat_files:
 
     if not os.path.exists(new_file_path):
         os.rename(first_converted_path, new_file_path)
-        print(f"File renamed to: {new_file_path}")
+        # print(f"File renamed to matshortage.xlsx")
     else:
         print(f"The file {new_file_path} already exists.")
 
@@ -217,15 +314,83 @@ if os.path.exists(Ord_file):
     wb = excel.Workbooks.Open(Ord_file)
     wb.SaveAs(Ord_xlsx_path, FileFormat=51)
     wb.Close()
-    print(f"Orders file converted to: {Ord_xlsx_path}")
+    print("Orders file converted to orders.xlsx")
     if os.path.exists(Ord_file):
         os.remove(Ord_file)
-        print(f"{Ord_file} has been deleted")
+        print("Original orders.xls file has been deleted")
     else:
-        print(f"{Ord_file} does not exist")
+        print("Original orders.xls does not exist")
+
+# Convert DailyReport file ( COMPLETED )
+DailyRptC_file = f"{download_path}/{downloaded3}"
+if os.path.exists(DailyRptC_file):
+    DailyRptC_xlsx_path = os.path.splitext(DailyRptC_file)[0] + " Completed" + ".xlsx"
+    wb = excel.Workbooks.Open(DailyRptC_file)
+    wb.SaveAs(DailyRptC_xlsx_path, FileFormat=51)
+    wb.Close()
+    print("DailyReport.xls file converted to xlsx format")
+    if os.path.exists(DailyRptC_file):
+        os.remove(DailyRptC_file)
+        print("Orginal DailyReport.xls file has been deleted")
+    else:
+        print("DailyReport.xls does not exist")
+
+# DAILY ORDER STATUS REPORT ( INCOMPLETES )
+
+print("\nDownloading Incompletes Daily Orders Status Report...")
+
+#Set date for third page (Daily Orders)
+DailyOrders_date_field = wait_for_element(driver, By.NAME, "Date")
+DailyOrders_date_field.clear()
+today = datetime.today()
+DailyOrders_date_field.send_keys(today.strftime("%m/%d/%Y")) # Sets date to the current day
+
+driver.execute_script("ChgDate()")
+
+try:
+    # Find the link by its visible text and click it
+    link = driver.find_element(By.LINK_TEXT, "Order Fulfillment Report")
+    link.click()
+    # print("Link clicked successfully!")
+
+except Exception as e:
+    print(f"Error: {e}")
+
+# Wait for the file to appear and be fully downloaded
+timeout = 300  # Set a timeout in seconds (adjust as needed)
+start_time = time.time()
+
+while time.time() - start_time < timeout:
+    files = [f for f in os.listdir(download_path) if f.startswith("DailyReport.xls")]
+    if files:
+        file_path = os.path.join(download_path, files[0])
+        if file_path.endswith(".crdownload") or file_path.endswith(".part"):  # Temporary download files
+            time.sleep(1)  # Wait and check again
+        else:
+            print("Download complete:", file_path)
+            break
+    time.sleep(1)
+else:
+    raise TimeoutError("File download timed out.")
+
+# Convert DailyReport file ( INCOMPLETES )
+DailyRptI_file = f"{download_path}/{downloaded3}"
+if os.path.exists(DailyRptI_file):
+    DailyRptI_xlsx_path = os.path.splitext(DailyRptI_file)[0] + " Incompletes" + ".xlsx"
+    wb = excel.Workbooks.Open(DailyRptI_file)
+    wb.SaveAs(DailyRptI_xlsx_path, FileFormat=51)
+    wb.Close()
+    print("DailyReport.xls file converted to xlsx format")
+    if os.path.exists(DailyRptI_file):
+        os.remove(DailyRptI_file)
+        print("Original DailyReport.xls has been deleted")
+    else:
+        print("DailyReport.xls does not exist")
 
 # Quit Excel application
 excel.Quit()
 
 # Quit the driver after the process is done
 driver.quit()
+
+print("AOMOSO Program has completed successfully!")
