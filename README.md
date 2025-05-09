@@ -1,6 +1,6 @@
 # SMC PROJECTS
 
-All projetcts listed have been configured to only work with an additional file that include work sensitive information.
+All projetcts listed have been configured to only work with an additional file that includes work sensitive information.
 
 ## Automated Reports
 
