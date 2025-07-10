@@ -27,23 +27,43 @@ def is_workday(date):
 def load_holidays(file_path):
     """Loads holiday dates from a file into a set."""
     with open(file_path, 'r') as file:
-        holidays = {line.strip() for line in file}  # Assuming holidays in MM/DD/YYYY format
+        holidays = {line.strip() for line in file if line.strip()}  # MM/DD/YYYY format
     return holidays
 
 # Set holiday file path
 holiday_file = 'holidays.txt'
 holidays = load_holidays(holiday_file)
 
+# Helper Function to Subtract One Business Day
+def subtract_one_business_day(date, holidays=holidays):
+    date -= timedelta(days=1)
+
+    while True:
+        date_str = date.strftime('%m/%d/%Y')
+
+        if date_str in holidays:
+            print(f"{date_str} is a holiday, going back one more day.")
+            date -= timedelta(days=1)
+            continue
+
+        if date.weekday() == 5:  # Saturday
+            print(f"{date.strftime('%m/%d/%Y')} is Saturday, going back one more day.")
+            date -= timedelta(days=1)
+            continue
+        elif date.weekday() == 6:  # Sunday
+            print(f"{date.strftime('%m/%d/%Y')} is Sunday, going back two days.")
+            date -= timedelta(days=2)
+            continue
+
+        break  # Found valid business day
+
+    return date
+
 # Get today's date
 today = datetime.today().date()
 today_str = today.strftime("%m/%d/%Y")
 
-previous_date = today - timedelta(days=1)
-
-if previous_date.weekday() == 5:  # If Saturday, go back to Friday
-    previous_date -= timedelta(days=1)
-elif previous_date.weekday() == 6:  # If Sunday, go back to Friday
-    previous_date -= timedelta(days=2)
+previous_date = subtract_one_business_day(today)
 
 yesterday_str = previous_date.strftime("%m/%d/%Y")
 
