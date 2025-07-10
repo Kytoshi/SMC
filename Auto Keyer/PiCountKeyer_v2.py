@@ -9,6 +9,15 @@ import time
 import threading
 from pynput import keyboard
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 ##### Program Global Settings #####
 
 ctk.set_appearance_mode("System")
@@ -68,13 +77,22 @@ class ClearPage(ctk.CTkFrame):
         )
         prompt2.place(relx=0.5, rely=0.35, anchor=CENTER)
 
+        promptDesc = ctk.CTkLabel(self,
+        text="Note: A 5 Second Countdown will start after pressing Confirm. \n Please ensure you are ready to select the PI Count Box...",
+        font=("Inter", 13, "italic"),
+        text_color="white",
+        anchor="center",
+        width=200
+        )
+        promptDesc.place(relx=0.5, rely=0.42, anchor=CENTER)
+
         self.clear_entry = ctk.CTkEntry(self, 
             placeholder_text="Enter number of boxes...", 
             width=300, 
             height=40, 
             border_color="#6A89A7", 
             textvariable=entryVar)
-        self.clear_entry.place(relx=0.5, rely=0.45, anchor=CENTER)
+        self.clear_entry.place(relx=0.5, rely=0.55, anchor=CENTER)
 
         begin_clearing_button = ctk.CTkButton(self, 
             text="Confirm", 
@@ -84,7 +102,7 @@ class ClearPage(ctk.CTkFrame):
             fg_color="#88BDF2",
             text_color="black", 
             command=self.validate_input)
-        begin_clearing_button.place(relx=0.5, rely=0.65, anchor=CENTER)
+        begin_clearing_button.place(relx=0.5, rely=0.75, anchor=CENTER)
 
     def validate_input(self):
         value = entryVar.get()
@@ -290,6 +308,15 @@ class KeyPage(ctk.CTkFrame):
             command=lambda: self.backhome()
             )
         self.key_page_button.place(relx=0.1, rely=0.2, anchor=CENTER)
+
+        promptDesc = ctk.CTkLabel(self,
+        text="Note: A 5 Second Countdown will start after pressing Confirm. \n Please ensure you are ready to select the PI Count Box...",
+        font=("Inter", 13, "italic"),
+        text_color="white",
+        anchor="center",
+        width=200
+        )
+        promptDesc.place(relx=0.5, rely=0.31, anchor=CENTER)
 
         self.file_path_text = ctk.CTkLabel(self, 
             text="Excel File Path:", 
