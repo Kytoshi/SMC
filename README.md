@@ -18,7 +18,7 @@ All projetcts listed have been configured to only work with an additional file t
 
 ### GI GR PENDING REPORT
 
-**Description:** Downloads transaction history from SAP utilizing Power Automate integration with the SAP program and then formats the excel engine file into legible summarized format for teams to utilize.
+**Description:** Downloads transaction history from SAP and then formats the excel engine file into legible summarized format for teams to utilize. 2 Versions: 1 Power Automate Script to structure before creating the python file.
 
 **<u> Files: </u>**
 
@@ -50,11 +50,32 @@ All projetcts listed have been configured to only work with an additional file t
 
 - config.json (not included)
 
+### B5B7 Report
+
+**Description:** Variety of python scripts to aid with downloading large amounts of data quickly with some being broken into multiple parts in case of an error and not needing to restart the entire process again.
+
+**<u> Files: </u>**
+
+- B5B7Download.py
+- CS07CSEDownload.py
+- CSEReport.py
+- ItemsDistrPDBS.py
+- UsageXL.py
+- Weekly Rpt Func.py
+  
+### 131819
+
+**Description:** Used to adjust power queries for certain excel report
+
+**<u> Files: </u>**
+
+- folderChange.py
+  
 ## Tools
 
 ### AutoKeyer
 
-**Description:** tool to automate physical count keying in based off excel sheet to increase efficency
+**Description:** tool to automate physical count keying in based off excel sheet to increase efficency. Updated to include visual UI instead of terminal prompts.
 
 **<u> Files: </u>**
 
