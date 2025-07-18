@@ -1,0 +1,279 @@
+/*****************************************************************************************************
+BODY, HTML
+*****************************************************************************************************/
+html,
+body {
+  background: #fff;
+  font-size: 10pt;
+  font-family: "Helvetica Neue", "Lucida Grande", "Segoe UI", Arial, Helvetica,
+    Verdana, sans-serif;
+  margin: 0px;
+  padding: 0px;
+  color: #000;
+}
+
+a:link,
+a:visited {
+  color: #02f;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #1d60ff;
+}
+
+a:active {
+  color: #034af3;
+  text-decoration: none;
+}
+
+p {
+  margin-bottom: 10px;
+  line-height: 1.6em;
+}
+
+textarea {
+  font-family: "Helvetica Neue", "Lucida Grande", "Segoe UI", Arial, Helvetica,
+    Verdana, sans-serif;
+}
+
+/*************************************************************************************************
+// PRIMARY LAY OUT ELEVENTS
+*************************************************************************************************/
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #fff;
+  width: 100%;
+  height: 62px;
+  z-index: 1000;
+}
+
+.header .title {
+  display: flex;
+  box-sizing: border-box;
+  justify-content: flex-start;
+  border-radius: 20px;
+  margin: 10px;
+  padding: 2rem;
+  font-size: 18px;
+  font-weight: bold;
+  background: #dee2e2;
+  color: #3440ac;
+  text-align: left;
+}
+
+.header .topNav {
+  padding: 3px 0px;
+  font-size: 12px;
+  background: #f2f2f2;
+  border-bottom: 1px solid #111;
+}
+
+.leftNav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100%;
+  background: #f2f2f2;
+  border-right: 1px solid #ccc;
+  z-index: 500;
+}
+
+.leftNavContent {
+  margin-left: 10px;
+  margin-top: 20px;
+}
+
+.page {
+  width: 100%;
+  min-height: 800px;
+  background-color: #fff;
+}
+
+.footer {
+  width: 100%;
+  height: 50px;
+  text-align: center;
+  color: #008;
+  border-top: 2px solid #aaf;
+}
+
+.clearTop {
+  height: 62px;
+}
+
+.clearLeft {
+  width: 200px;
+}
+
+.mainContent {
+  padding: 5px;
+}
+
+/*************************************************************************************************
+// OTHERS
+*************************************************************************************************/
+
+.button {
+  border: 1px solid #45f;
+  padding: 6px;
+  background-color: #cef;
+  cursor: pointer;
+  width: 80px;
+}
+
+.leftNavHeader {
+  border: 1px solid #fff;
+  background: #def;
+  padding-left: 5px;
+  margin-top: 10px;
+}
+
+.highlightcell {
+  background-color: #f2f2f2;
+}
+
+.gridTable1 {
+  border: 1px solid #abc;
+  margin: auto;
+}
+
+th,
+td .gridTable1 {
+  border: 1px solid #abc;
+  padding: 4px;
+}
+
+.gridTable1 td {
+  border: 1px solid #abc;
+  padding: 2px;
+}
+
+.gridTable1 th {
+  background: #07f;
+  color: #fff;
+}
+
+.gridTable2 {
+  border: 1px solid #888;
+  margin: auto;
+}
+
+th,
+td .gridTable2 {
+  border: 1px solid #888;
+  padding: 4px;
+}
+
+.gridTable2 td {
+  border: 1px solid #888;
+  padding: 2px;
+}
+
+.gridTable2 th {
+  background: #def;
+  color: #222;
+}
+
+.popupContainer {
+  position: fixed;
+  top: 2px;
+  left: 0px;
+  margin: 0px;
+  padding: 0px;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  z-index: 1050;
+}
+
+.popupHeader {
+  width: 600px;
+  text-align: right;
+  background-color: #def;
+  margin: auto;
+  border: 1px solid #bcf;
+}
+
+.popupContent {
+  width: 600px;
+  max-height: 90%;
+  overflow: auto;
+  border: 2px solid #59f;
+  margin: auto;
+  background-color: #e0f0ff;
+  padding: 5px;
+}
+
+.popupCalendar {
+  position: fixed;
+
+  background: #fff;
+  text-align: center;
+  z-index: 1210;
+}
+
+/* DROP DOWN  
+----------------------------------------------------------*/
+.acc_dropdown {
+  position: relative;
+  display: inline-block;
+  color: #00f;
+}
+
+.acc_dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #fcfcfc;
+  border: 1px solid #f80;
+  width: 260px;
+  text-align: left;
+  z-index: 1;
+}
+
+.acc_dropdown:hover .acc_dropdown-content {
+  display: block;
+}
+
+.acc_dropdown-content a {
+  color: #00c;
+  padding: 10px 5px;
+  text-decoration: none;
+  display: block;
+}
+
+.acc_dropdown-content a:hover {
+  background-color: #ddd;
+  color: #c00;
+}
+
+/* TOOL TIP
+----------------------------------------------------------*/
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+
+  background-color: black;
+  color: #fff;
+  text-align: left;
+  border-radius: 2px;
+  padding: 5px;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
