@@ -1,6 +1,6 @@
 # SMC PROJECTS
 
-All projetcts listed have been configured to only work with an additional file that includes work sensitive information.
+All Projects Have all work sensitive information removed and will not be operable without a key file.
 
 ## Automated Reports
 
