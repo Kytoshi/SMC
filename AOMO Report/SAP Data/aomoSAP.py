@@ -1,4 +1,5 @@
 import win32com.client
+import multiprocessing
 import time
 from datetime import datetime
 from datetime import datetime, timedelta
@@ -7,17 +8,9 @@ import subprocess
 import shutil
 import os
 import json
-
-# Load configuration from config.json
-with open('config1.json', encoding='utf-8') as config_file:
-    config = json.load(config_file)
-
-password = config['password']
-username = config['username']
-folder = config['folder']
-Rename = config['Rename']
-destination_folder = config['destination_folder']
-file_prefix = config['file_prefix']
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
+from tkinter import filedialog
 
 # Helper function to check if a date is a workday (Monday to Friday)
 def is_workday(date):
@@ -58,19 +51,8 @@ def subtract_one_business_day(date, holidays=holidays):
         break  # Found valid business day
 
     return date
-
-# Get today's date
-today = datetime.today().date()
-today_str = today.strftime("%m/%d/%Y")
-
-previous_date = subtract_one_business_day(today)
-
-yesterday_str = previous_date.strftime("%m/%d/%Y")
-
-print(f"Today's Date is {today}\n")
-print(f"Last workday was {previous_date}\n")
  
-def find_and_copy_file(source_folder, destination_folder, file_prefix):
+def find_and_copy_file(source_folder, destination_folder, file_prefix, previous_date):
     """
     Finds the latest file in the source_folder that starts with file_prefix, 
     renames it with the current date, and copies it to the destination_folder.
@@ -94,7 +76,7 @@ def find_and_copy_file(source_folder, destination_folder, file_prefix):
 
     try:
         shutil.copy2(source_path, destination_path)
-        print(f"Copied {latest_file} to {destination_folder} as {new_file_name}\n")
+        print(f"Copied {latest_file} to {folder} as {new_file_name}\n")
     except Exception as e:
         print(f"Error copying file: {e}")
 
@@ -129,12 +111,10 @@ def close_excel():
     time.sleep(2)
     os.system("taskkill /F /IM excel.exe")
 
-def Open_SAP():
+def Open_SAP(username, password):
     exe_path = r"C:\Program Files (x86)\SAP\FrontEnd\SapGui\saplogon.exe"
     process = subprocess.Popen(exe_path)
     time.sleep(5)  # Adjust this delay as necessary
-
-    print("Program started, now running the rest of the script...")
 
     sapshcut_path = r"C:\Program Files (x86)\SAP\FrontEnd\SAPgui\sapshcut.exe"
     command = f'"{sapshcut_path}" -system=PR1 -client=100 -user={username} -pw={password} -language=EN'
@@ -157,8 +137,7 @@ def SAP_Init():
         connection = application.Children(0)
     return connection
 
-
-def MO_Backorders():
+def MO_Backorders(today_str, folder):
 
     print("Starting MO BACKORDERS Transaction...")
 
@@ -190,7 +169,7 @@ def MO_Backorders():
     session.findById("wnd[1]/tbar[0]/btn[11]").press()
     print("MO BACKORDERS (MB25) transaction completed.")
 
-def MB51():
+def MB51(today_str, yesterday_str, folder):
 
     print("Starting MB51 Transaction...")
 
@@ -224,7 +203,7 @@ def MB51():
 
     print("MB51 transaction completed.")
 
-def DAILY_MO_MB25():
+def DAILY_MO_MB25(today_str, yesterday_str, folder):
 
     print("Starting Daily MO MB25 Transaction...")
 
@@ -259,30 +238,31 @@ def DAILY_MO_MB25():
 
     print("Daily MO MB25 (MB25) transaction completed.")
 
-if __name__ == '__main__':
-    import multiprocessing
+def Report(username, password, folder):
+    # Get today's date
+    today = datetime.today().date()
+    today_str = today.strftime("%m/%d/%Y")
+
+    # Subtract one business day from today
+    previous_date = subtract_one_business_day(today)
+    yesterday_str = previous_date.strftime("%m/%d/%Y")
+
     multiprocessing.freeze_support()
 
+    archiveFolder = folder + "Daily MO MB25 Archive/"
+    print(archiveFolder)
+
     # Copy MB25 into Archive Folder
-    find_and_copy_file(folder, destination_folder, file_prefix)
+    find_and_copy_file(folder, archiveFolder , "DAILY MO MB25", yesterday_str)
 
     # Get the current directory
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Define the executable file name
-    exe_file = Rename
-
-    # Construct the full path
-    exe_path = os.path.join(current_dir, exe_file)
-
-    # Run the executable
-    subprocess.Popen(exe_path, creationflags=subprocess.CREATE_NEW_CONSOLE)
-
     try:
-        Open_SAP()
-        window1 = Process(target = MO_Backorders)
-        window2 = Process(target = MB51)
-        window3 = Process(target = DAILY_MO_MB25)
+        Open_SAP(username, password)
+        window1 = Process(target = MO_Backorders, args=(today_str, folder))
+        window2 = Process(target = MB51, args=(today_str, yesterday_str, folder))
+        window3 = Process(target = DAILY_MO_MB25, args=(today_str, yesterday_str, folder))
         
         window1.start()
         window2.start()
@@ -298,3 +278,61 @@ if __name__ == '__main__':
 
     except Exception as e:
         print(e)
+
+def credentials():
+    def browse_folder():
+        folder_selected = filedialog.askdirectory()
+        if folder_selected:
+            folder_path_var.set(folder_selected)
+
+    def submit():
+        username = username_var.get()
+        password = password_var.get()
+        folder_path = folder_path_var.get() + "/"
+        
+        # You can now use these variables as needed
+        print("Username:", username)
+        print("Password:", password)
+        print("Folder Path:", folder_path)
+        Report(username, password, folder_path)
+
+    app = tb.Window(themename="flatly")  # Modern theme
+
+    app.title("AO MO SO Report Downloader")
+
+    # Variables
+    username_var = tb.StringVar()
+    password_var = tb.StringVar()
+    folder_path_var = tb.StringVar()
+
+    # UI Layout
+    frame = tb.Frame(app, padding=20)
+    frame.pack(fill=BOTH, expand=YES)
+
+    tb.Label(frame, text="Username:", font=("Segoe UI", 12)).grid(row=0, column=0, sticky=W, pady=5)
+    username_entry = tb.Entry(frame, textvariable=username_var, font=("Segoe UI", 12))
+    username_entry.grid(row=0, column=1, pady=5, sticky=EW)
+
+    tb.Label(frame, text="Password:", font=("Segoe UI", 12)).grid(row=1, column=0, sticky=W, pady=5)
+    password_entry = tb.Entry(frame, textvariable=password_var, font=("Segoe UI", 12), show="*")
+    password_entry.grid(row=1, column=1, pady=5, sticky=EW)
+
+    tb.Label(frame, text="Folder Path:", font=("Segoe UI", 12)).grid(row=2, column=0, sticky=W, pady=5)
+    folder_entry = tb.Entry(frame, textvariable=folder_path_var, font=("Segoe UI", 12))
+    folder_entry.grid(row=2, column=1, pady=5, sticky=EW)
+
+    browse_button = tb.Button(frame, text="Browse...", command=browse_folder)
+    browse_button.grid(row=2, column=2, padx=10, pady=5)
+
+    submit_button = tb.Button(frame, text="Submit", bootstyle=SUCCESS, command=submit)
+    submit_button.grid(row=3, column=1, pady=20)
+
+    # Make columns expand nicely
+    frame.columnconfigure(1, weight=1)
+
+    app.mainloop()
+    return username_var.get(), password_var.get(), folder_path_var.get()
+
+if __name__ == '__main__':
+    app = credentials()
+    

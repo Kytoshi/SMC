@@ -20,10 +20,11 @@ with open('config.json', encoding='utf-8') as config_file:
     config = json.load(config_file)
 
 # Load from config.json
-file1_delete = config["file1_delete"]
-file2_delete = config["file2_delete"]
-file3_delete = config["file3_delete"]
-file4_delete = config["file4_delete"]
+f1 = config["file1"]
+f2 = config["file2"]
+f3 = config["file3"]
+f4 = config["file4"]
+f5 = config["file5"]
 current_report = config["current_report"]
 loginbttn_id = config["loginbttn_id"]
 link1_id = config["link1_id"]
@@ -46,6 +47,17 @@ downloaded3 = config["downloaded3"]
 website = config["website"]
 
 lock = Lock()
+
+# Helper function to load holidays from a file
+def load_holidays(file_path):
+    """Loads holiday dates from a file into a set."""
+    with open(file_path, 'r') as file:
+        holidays = {line.strip() for line in file if line.strip()}  # MM/DD/YYYY format
+    return holidays
+
+# Set holiday file path
+holiday_file = 'holidays.txt'
+holidays = load_holidays(holiday_file)
 
 # Delete files if they exist
 if os.path.exists(file1_delete):
@@ -72,6 +84,12 @@ if os.path.exists(file4_delete):
 else:
     print(f"{file4_delete} does not exist")
 
+if os.path.exists(file5_delete):
+    os.remove(file5_delete)
+    print(f"{file5_delete} has been deleted")
+else:
+    print(f"{file5_delete} does not exist")
+
 # Set up Chrome options
 chrome_options = Options()
 chrome_options.add_experimental_option('prefs', {
@@ -93,7 +111,7 @@ chrome_options.add_argument("--max-old-space-size=4096")
 chrome_options.add_argument("--disable-software-rasterizer")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-popup-blocking")
-chrome_options.add_argument("window-size=1920x1080")
+chrome_options.add_argument("window-size=1920,1080")
 
 def create_driver():
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
@@ -137,18 +155,28 @@ def process_export_button(driver, window_handle, export_button_locator):
     finally:
         lock.release()
 
-# Helper Function to Subtract One Business Day
-def subtract_one_business_day(date):
-    # Subtract one day
+def subtract_one_business_day(date, holidays=holidays):
     date -= timedelta(days=1)
-    
-    # If it's Saturday, go back to Friday
-    if date.weekday() == 5:  # Saturday
-        date -= timedelta(days=1)
-    # If it's Sunday, go back to Friday
-    elif date.weekday() == 6:  # Sunday
-        date -= timedelta(days=2)
-    
+
+    while True:
+        date_str = date.strftime('%m/%d/%Y')
+
+        if date_str in holidays:
+            print(f"{date_str} is a holiday, going back one more day.")
+            date -= timedelta(days=1)
+            continue
+
+        if date.weekday() == 5:  # Saturday
+            print(f"{date.strftime('%m/%d/%Y')} is Saturday, going back one more day.")
+            date -= timedelta(days=1)
+            continue
+        elif date.weekday() == 6:  # Sunday
+            print(f"{date.strftime('%m/%d/%Y')} is Sunday, going back two days.")
+            date -= timedelta(days=2)
+            continue
+
+        break  # Found valid business day
+
     return date
 
 driver = create_driver()
@@ -226,10 +254,10 @@ driver.get("https://pdbs.supermicro.com:18893/Home")
 # Login steps
 # print("Logging in...")
 # username_field = driver.find_element(By.ID, "txtUserName")
-password_field = driver.find_element(By.ID, "xPWD")
+# password_field = driver.find_element(By.ID, "xPWD")
 # username_field.send_keys(username)
-password_field.send_keys(password)
-driver.find_element(By.ID, loginbttn_id).click()
+# password_field.send_keys(password)
+# driver.find_element(By.ID, loginbttn_id).click()
 
 # Wait for the login to complete
 time.sleep(1)
@@ -383,6 +411,58 @@ if os.path.exists(DailyRptI_file):
     print("DailyReport.xls file converted to xlsx format")
     if os.path.exists(DailyRptI_file):
         os.remove(DailyRptI_file)
+        print("Original DailyReport.xls has been deleted")
+    else:
+        print("DailyReport.xls does not exist")
+
+# Billing Only Report
+
+print("\nDownloading Billing Only Report...")
+
+#Set date for third page (Daily Orders)
+DailyOrders_date_field = wait_for_element(driver, By.NAME, "Date")
+DailyOrders_date_field.clear()
+today = datetime.today()
+DailyOrders_date_field.send_keys(today.strftime("%m/%d/%Y")) # Sets date to the current day
+
+driver.execute_script("ChgDate()")
+
+try:
+    # Find the link by its visible text and click it
+    link = driver.find_element(By.LINK_TEXT, "Report in Excel")
+    link.click()
+    # print("Link clicked successfully!")
+
+except Exception as e:
+    print(f"Error: {e}")
+
+# Wait for the file to appear and be fully downloaded
+timeout = 300  # Set a timeout in seconds (adjust as needed)
+start_time = time.time()
+
+while time.time() - start_time < timeout:
+    files = [f for f in os.listdir(download_path) if f.startswith("DailyReport.xls")]
+    if files:
+        file_path = os.path.join(download_path, files[0])
+        if file_path.endswith(".crdownload") or file_path.endswith(".part"):  # Temporary download files
+            time.sleep(1)  # Wait and check again
+        else:
+            print("Download complete:", file_path)
+            break
+    time.sleep(1)
+else:
+    raise TimeoutError("File download timed out.")
+
+# Convert Daily report to xlsx format (Billing Only)
+DailyRptB_file = f"{download_path}/{downloaded3}"
+if os.path.exists(DailyRptB_file):
+    DailyRptB_xlsx_path = download_path + "\\" + "Billing Only" + ".xlsx"
+    wb = excel.Workbooks.Open(DailyRptB_file)
+    wb.SaveAs(DailyRptB_xlsx_path, FileFormat=51)
+    wb.Close()
+    print("DailyReport.xls file converted to xlsx format")
+    if os.path.exists(DailyRptB_file):
+        os.remove(DailyRptB_file)
         print("Original DailyReport.xls has been deleted")
     else:
         print("DailyReport.xls does not exist")
