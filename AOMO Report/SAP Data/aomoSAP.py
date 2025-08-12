@@ -76,7 +76,7 @@ def find_and_copy_file(source_folder, destination_folder, file_prefix, previous_
 
     try:
         shutil.copy2(source_path, destination_path)
-        print(f"Copied {latest_file} to {folder} as {new_file_name}\n")
+        print(f"Copied {latest_file} to {destination_folder} as {new_file_name}\n")
     except Exception as e:
         print(f"Error copying file: {e}")
 
@@ -249,11 +249,12 @@ def Report(username, password, folder):
 
     multiprocessing.freeze_support()
 
-    archiveFolder = folder + "Daily MO MB25 Archive/"
-    print(archiveFolder)
+    archiveFolder = folder + "/Daily MO MB25 Archive"
+    if not os.path.exists(archiveFolder):
+        os.makedirs(archiveFolder)
 
     # Copy MB25 into Archive Folder
-    find_and_copy_file(folder, archiveFolder , "DAILY MO MB25", yesterday_str)
+    find_and_copy_file(folder, archiveFolder , "DAILY MO MB25", previous_date)
 
     # Get the current directory
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -278,61 +279,3 @@ def Report(username, password, folder):
 
     except Exception as e:
         print(e)
-
-def credentials():
-    def browse_folder():
-        folder_selected = filedialog.askdirectory()
-        if folder_selected:
-            folder_path_var.set(folder_selected)
-
-    def submit():
-        username = username_var.get()
-        password = password_var.get()
-        folder_path = folder_path_var.get() + "/"
-        
-        # You can now use these variables as needed
-        print("Username:", username)
-        print("Password:", password)
-        print("Folder Path:", folder_path)
-        Report(username, password, folder_path)
-
-    app = tb.Window(themename="flatly")  # Modern theme
-
-    app.title("AO MO SO Report Downloader")
-
-    # Variables
-    username_var = tb.StringVar()
-    password_var = tb.StringVar()
-    folder_path_var = tb.StringVar()
-
-    # UI Layout
-    frame = tb.Frame(app, padding=20)
-    frame.pack(fill=BOTH, expand=YES)
-
-    tb.Label(frame, text="Username:", font=("Segoe UI", 12)).grid(row=0, column=0, sticky=W, pady=5)
-    username_entry = tb.Entry(frame, textvariable=username_var, font=("Segoe UI", 12))
-    username_entry.grid(row=0, column=1, pady=5, sticky=EW)
-
-    tb.Label(frame, text="Password:", font=("Segoe UI", 12)).grid(row=1, column=0, sticky=W, pady=5)
-    password_entry = tb.Entry(frame, textvariable=password_var, font=("Segoe UI", 12), show="*")
-    password_entry.grid(row=1, column=1, pady=5, sticky=EW)
-
-    tb.Label(frame, text="Folder Path:", font=("Segoe UI", 12)).grid(row=2, column=0, sticky=W, pady=5)
-    folder_entry = tb.Entry(frame, textvariable=folder_path_var, font=("Segoe UI", 12))
-    folder_entry.grid(row=2, column=1, pady=5, sticky=EW)
-
-    browse_button = tb.Button(frame, text="Browse...", command=browse_folder)
-    browse_button.grid(row=2, column=2, padx=10, pady=5)
-
-    submit_button = tb.Button(frame, text="Submit", bootstyle=SUCCESS, command=submit)
-    submit_button.grid(row=3, column=1, pady=20)
-
-    # Make columns expand nicely
-    frame.columnconfigure(1, weight=1)
-
-    app.mainloop()
-    return username_var.get(), password_var.get(), folder_path_var.get()
-
-if __name__ == '__main__':
-    app = credentials()
-    
