@@ -22,16 +22,18 @@ def submit():
         PDBSusername = PDBSusername_var.get()
         PDBSpassword = PDBSpassword_var.get()
         folder_path = folder_path_var.get()
-        aomoSAP.Report(SAPusername, SAPpassword, str(folder_path))
+
+         # You can now use these variables as needed
+        print("SAP Username:", SAPusername)
+        print("SAP Password:", SAPpassword)
+        print("PDBS Username:", PDBSusername)
+        print("PDBS Password:", PDBSpassword)
+        print("Folder Path:", folder_path)
+
+        aomoSAP.Report(SAPusername, SAPpassword, folder_path)
+
     except Exception as e:
         logging.error("An error occurred", exc_info=True)
-    
-    # You can now use these variables as needed
-    print("SAP Username:", SAPusername)
-    print("SAP Password:", SAPpassword)
-    print("PDBS Username:", PDBSusername)
-    print("PDBS Password:", PDBSpassword)
-    print("Folder Path:", folder_path)
 
 
 app = tb.Window(themename="flatly")  # Modern theme

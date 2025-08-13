@@ -13,44 +13,39 @@ from ttkbootstrap.constants import *
 from tkinter import filedialog
 
 # Helper function to check if a date is a workday (Monday to Friday)
-def is_workday(date):
-    return date.weekday() < 5  # Monday to Friday are considered workdays
+# def is_workday(date):
+#     return date.weekday() < 5  # Monday to Friday are considered workdays
 
 # Helper function to load holidays from a file
-def load_holidays(file_path):
-    """Loads holiday dates from a file into a set."""
-    with open(file_path, 'r') as file:
-        holidays = {line.strip() for line in file if line.strip()}  # MM/DD/YYYY format
-    return holidays
-
-# Set holiday file path
-holiday_file = 'holidays.txt'
-holidays = load_holidays(holiday_file)
+# def load_holidays(file_path):
+#     """Loads holiday dates from a file into a set."""
+#     with open(file_path, 'r') as file:
+#         holidays = {line.strip() for line in file if line.strip()}  # MM/DD/YYYY format
+#     return holidays
 
 # Helper Function to Subtract One Business Day
-def subtract_one_business_day(date, holidays=holidays):
-    date -= timedelta(days=1)
+def subtract_one_business_day(date, holidays_file="holidays.txt"):
+    # Read holidays and store as datetime.date objects
+    with open(holidays_file, 'r') as file:
+        holidays = {
+            datetime.strptime(line.strip(), "%m/%d/%Y").date()
+            for line in file if line.strip()
+        }
 
     while True:
-        date_str = date.strftime('%m/%d/%Y')
-
-        if date_str in holidays:
-            print(f"{date_str} is a holiday, going back one more day.")
-            date -= timedelta(days=1)
+        date -= timedelta(days=1)  # Go to previous day
+        
+        # Skip weekends
+        if date.weekday() >= 5:  # Saturday=5, Sunday=6
             continue
-
-        if date.weekday() == 5:  # Saturday
-            print(f"{date.strftime('%m/%d/%Y')} is Saturday, going back one more day.")
-            date -= timedelta(days=1)
+        
+        # Skip holidays
+        if date in holidays:
             continue
-        elif date.weekday() == 6:  # Sunday
-            print(f"{date.strftime('%m/%d/%Y')} is Sunday, going back two days.")
-            date -= timedelta(days=2)
-            continue
-
-        break  # Found valid business day
-
-    return date
+        
+        # Found valid working day
+        print(f"Previous business day: {date.strftime('%m/%d/%Y')}")
+        return date
  
 def find_and_copy_file(source_folder, destination_folder, file_prefix, previous_date):
     """
@@ -240,6 +235,7 @@ def DAILY_MO_MB25(today_str, yesterday_str, folder):
 
 def Report(username, password, folder):
     # Get today's date
+
     today = datetime.today().date()
     today_str = today.strftime("%m/%d/%Y")
 
