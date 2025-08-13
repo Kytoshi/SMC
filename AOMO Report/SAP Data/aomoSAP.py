@@ -12,17 +12,6 @@ import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 from tkinter import filedialog
 
-# Helper function to check if a date is a workday (Monday to Friday)
-# def is_workday(date):
-#     return date.weekday() < 5  # Monday to Friday are considered workdays
-
-# Helper function to load holidays from a file
-# def load_holidays(file_path):
-#     """Loads holiday dates from a file into a set."""
-#     with open(file_path, 'r') as file:
-#         holidays = {line.strip() for line in file if line.strip()}  # MM/DD/YYYY format
-#     return holidays
-
 # Helper Function to Subtract One Business Day
 def subtract_one_business_day(date, holidays_file="holidays.txt"):
     # Read holidays and store as datetime.date objects
