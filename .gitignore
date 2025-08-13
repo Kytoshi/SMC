@@ -2,3 +2,7 @@
 B39Delta/config.json
 AOMO Report/Excel/config.json
 AOMO Report/Website Data Downloader/config.json
+AOMO Report/SAP Data/__pycache__/aomoSAP.cpython-313.pyc
+AOMO Report/SAP Data/config1.json
+AOMO Report/SAP Data/error_log.txt
+AOMO Report/SAP Data/holidays.txt

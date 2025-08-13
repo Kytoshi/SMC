@@ -1,4 +1,5 @@
 import win32com.client
+import multiprocessing
 import time
 from datetime import datetime
 from datetime import datetime, timedelta
@@ -7,70 +8,35 @@ import subprocess
 import shutil
 import os
 import json
-
-# Load configuration from config.json
-with open('config1.json', encoding='utf-8') as config_file:
-    config = json.load(config_file)
-
-password = config['password']
-username = config['username']
-folder = config['folder']
-Rename = config['Rename']
-destination_folder = config['destination_folder']
-file_prefix = config['file_prefix']
-
-# Helper function to check if a date is a workday (Monday to Friday)
-def is_workday(date):
-    return date.weekday() < 5  # Monday to Friday are considered workdays
-
-# Helper function to load holidays from a file
-def load_holidays(file_path):
-    """Loads holiday dates from a file into a set."""
-    with open(file_path, 'r') as file:
-        holidays = {line.strip() for line in file if line.strip()}  # MM/DD/YYYY format
-    return holidays
-
-# Set holiday file path
-holiday_file = 'holidays.txt'
-holidays = load_holidays(holiday_file)
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
+from tkinter import filedialog
 
 # Helper Function to Subtract One Business Day
-def subtract_one_business_day(date, holidays=holidays):
-    date -= timedelta(days=1)
+def subtract_one_business_day(date, holidays_file="holidays.txt"):
+    # Read holidays and store as datetime.date objects
+    with open(holidays_file, 'r') as file:
+        holidays = {
+            datetime.strptime(line.strip(), "%m/%d/%Y").date()
+            for line in file if line.strip()
+        }
 
     while True:
-        date_str = date.strftime('%m/%d/%Y')
-
-        if date_str in holidays:
-            print(f"{date_str} is a holiday, going back one more day.")
-            date -= timedelta(days=1)
+        date -= timedelta(days=1)  # Go to previous day
+        
+        # Skip weekends
+        if date.weekday() >= 5:  # Saturday=5, Sunday=6
             continue
-
-        if date.weekday() == 5:  # Saturday
-            print(f"{date.strftime('%m/%d/%Y')} is Saturday, going back one more day.")
-            date -= timedelta(days=1)
+        
+        # Skip holidays
+        if date in holidays:
             continue
-        elif date.weekday() == 6:  # Sunday
-            print(f"{date.strftime('%m/%d/%Y')} is Sunday, going back two days.")
-            date -= timedelta(days=2)
-            continue
-
-        break  # Found valid business day
-
-    return date
-
-# Get today's date
-today = datetime.today().date()
-today_str = today.strftime("%m/%d/%Y")
-
-previous_date = subtract_one_business_day(today)
-
-yesterday_str = previous_date.strftime("%m/%d/%Y")
-
-print(f"Today's Date is {today}\n")
-print(f"Last workday was {previous_date}\n")
+        
+        # Found valid working day
+        print(f"Previous business day: {date.strftime('%m/%d/%Y')}")
+        return date
  
-def find_and_copy_file(source_folder, destination_folder, file_prefix):
+def find_and_copy_file(source_folder, destination_folder, file_prefix, previous_date):
     """
     Finds the latest file in the source_folder that starts with file_prefix, 
     renames it with the current date, and copies it to the destination_folder.
@@ -129,12 +95,10 @@ def close_excel():
     time.sleep(2)
     os.system("taskkill /F /IM excel.exe")
 
-def Open_SAP():
+def Open_SAP(username, password):
     exe_path = r"C:\Program Files (x86)\SAP\FrontEnd\SapGui\saplogon.exe"
     process = subprocess.Popen(exe_path)
     time.sleep(5)  # Adjust this delay as necessary
-
-    print("Program started, now running the rest of the script...")
 
     sapshcut_path = r"C:\Program Files (x86)\SAP\FrontEnd\SAPgui\sapshcut.exe"
     command = f'"{sapshcut_path}" -system=PR1 -client=100 -user={username} -pw={password} -language=EN'
@@ -157,8 +121,7 @@ def SAP_Init():
         connection = application.Children(0)
     return connection
 
-
-def MO_Backorders():
+def MO_Backorders(today_str, folder):
 
     print("Starting MO BACKORDERS Transaction...")
 
@@ -190,7 +153,7 @@ def MO_Backorders():
     session.findById("wnd[1]/tbar[0]/btn[11]").press()
     print("MO BACKORDERS (MB25) transaction completed.")
 
-def MB51():
+def MB51(today_str, yesterday_str, folder):
 
     print("Starting MB51 Transaction...")
 
@@ -224,7 +187,7 @@ def MB51():
 
     print("MB51 transaction completed.")
 
-def DAILY_MO_MB25():
+def DAILY_MO_MB25(today_str, yesterday_str, folder):
 
     print("Starting Daily MO MB25 Transaction...")
 
@@ -259,30 +222,33 @@ def DAILY_MO_MB25():
 
     print("Daily MO MB25 (MB25) transaction completed.")
 
-if __name__ == '__main__':
-    import multiprocessing
+def Report(username, password, folder):
+    # Get today's date
+
+    today = datetime.today().date()
+    today_str = today.strftime("%m/%d/%Y")
+
+    # Subtract one business day from today
+    previous_date = subtract_one_business_day(today)
+    yesterday_str = previous_date.strftime("%m/%d/%Y")
+
     multiprocessing.freeze_support()
 
+    archiveFolder = folder + "/Daily MO MB25 Archive"
+    if not os.path.exists(archiveFolder):
+        os.makedirs(archiveFolder)
+
     # Copy MB25 into Archive Folder
-    find_and_copy_file(folder, destination_folder, file_prefix)
+    find_and_copy_file(folder, archiveFolder , "DAILY MO MB25", previous_date)
 
     # Get the current directory
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Define the executable file name
-    exe_file = Rename
-
-    # Construct the full path
-    exe_path = os.path.join(current_dir, exe_file)
-
-    # Run the executable
-    subprocess.Popen(exe_path, creationflags=subprocess.CREATE_NEW_CONSOLE)
-
     try:
-        Open_SAP()
-        window1 = Process(target = MO_Backorders)
-        window2 = Process(target = MB51)
-        window3 = Process(target = DAILY_MO_MB25)
+        Open_SAP(username, password)
+        window1 = Process(target = MO_Backorders, args=(today_str, folder))
+        window2 = Process(target = MB51, args=(today_str, yesterday_str, folder))
+        window3 = Process(target = DAILY_MO_MB25, args=(today_str, yesterday_str, folder))
         
         window1.start()
         window2.start()
