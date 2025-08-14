@@ -118,9 +118,23 @@ class SecondPage(tb.Frame):
 
         tb.Label(self, text="Choose an option:", font=("Segoe UI", 14)).pack(pady=10)
 
-        tb.Button(self, text="Option 1", bootstyle=INFO, width=20, command=self.option1).pack(pady=5)
-        tb.Button(self, text="Option 2", bootstyle=INFO, width=20, command=self.option2).pack(pady=5)
-        tb.Button(self, text="Back", bootstyle=SECONDARY, width=20, command=lambda: controller.show_frame("FormPage")).pack(pady=20)
+        dataButton = tb.Button(self, 
+            text="Option 1", 
+            bootstyle=INFO, 
+            width=20, 
+            command=self.option1).pack(pady=5)
+        
+        xlButton = tb.Button(self, 
+            text="Report", 
+            bootstyle=INFO, 
+            width=20, 
+            command=self.option2).pack(pady=5)
+
+        logoutButton = tb.Button(self, 
+            text="Back", 
+            bootstyle=SECONDARY, 
+            width=20, 
+            command=lambda: controller.show_frame("FormPage")).pack(pady=20)
 
     def option1(self):
         print("Option 1 clicked!")
