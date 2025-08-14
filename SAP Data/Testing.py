@@ -14,7 +14,7 @@ class FormPage(tb.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, padding=20)
         self.controller = controller
-
+    
         # Variables
         self.SAPusername_var = tb.StringVar()
         self.SAPpassword_var = tb.StringVar()
@@ -41,22 +41,52 @@ class FormPage(tb.Frame):
             )
         self.sapPassText.grid(row=1, column=0, sticky=W, pady=5)
 
-        self.sapPassForm = tb.Entry(self, textvariable=self.SAPpassword_var, font=("Segoe UI", 12), show="*").grid(row=1, column=1, pady=5, sticky=EW)
+        self.sapPassForm = tb.Entry(self, 
+            textvariable=self.SAPpassword_var, 
+            font=("Segoe UI", 12), show="*"
+            )
+        self.sapPassForm.grid(row=1, column=1, pady=5, sticky=EW)
 
-        self.pdbsUserText = tb.Label(self, text="PDBS Username:", font=("Segoe UI", 12)).grid(row=3, column=0, sticky=W, pady=5)
-        self.pdbsUserForm = tb.Entry(self, textvariable=self.PDBSusername_var, font=("Segoe UI", 12)).grid(row=3, column=1, pady=5, sticky=EW)
+        self.pdbsUserText = tb.Label(self, 
+            text="PDBS Username:", 
+            font=("Segoe UI", 12))
+        self.pdbsUserText.grid(row=3, column=0, sticky=W, pady=5)
 
-        self.pdbsPassText = tb.Label(self, text="PDBS Password:", font=("Segoe UI", 12)).grid(row=4, column=0, sticky=W, pady=5)
-        self.pdbsPassForm = tb.Entry(self, textvariable=self.PDBSpassword_var, font=("Segoe UI", 12), show="*").grid(row=4, column=1, pady=5, sticky=EW)
+        self.pdbsUserForm = tb.Entry(self, 
+            textvariable=self.PDBSusername_var, 
+            font=("Segoe UI", 12))
+        self.pdbsUserForm.grid(row=3, column=1, pady=5, sticky=EW)
 
-        self.folderText = tb.Label(self, text="Folder Path:", font=("Segoe UI", 12)).grid(row=5, column=0, sticky=W, pady=5)
-        self.folderForm = tb.Entry(self, textvariable=self.folder_path_var, font=("Segoe UI", 12)).grid(row=5, column=1, pady=5, sticky=EW)
+        self.pdbsPassText = tb.Label(self, 
+            text="PDBS Password:", 
+            font=("Segoe UI", 12))
+        self.pdbsPassText.grid(row=4, column=0, sticky=W, pady=5)
 
-        browse_btn = tb.Button(self, text="Browse...", command=self.browse_folder)
-        browse_btn.grid(row=5, column=2, padx=10, pady=5)
+        self.pdbsPassForm = tb.Entry(self, 
+            textvariable=self.PDBSpassword_var, 
+            font=("Segoe UI", 12), show="*")
+        self.pdbsPassForm.grid(row=4, column=1, pady=5, sticky=EW)
 
-        submit_btn = tb.Button(self, text="Submit", bootstyle=SUCCESS, command=self.submit)
-        submit_btn.grid(row=6, column=1, pady=20)
+        self.folderText = tb.Label(self, 
+            text="Folder Path:", 
+            font=("Segoe UI", 12))
+        self.folderText.grid(row=5, column=0, sticky=W, pady=5)
+
+        self.folderForm = tb.Entry(self, 
+            textvariable=self.folder_path_var, 
+            font=("Segoe UI", 12))
+        self.folderForm.grid(row=5, column=1, pady=5, sticky=EW)
+
+        self.browse_btn = tb.Button(self, 
+            text="Browse...", 
+            command=self.browse_folder)
+        self.browse_btn.grid(row=5, column=2, padx=10, pady=5)
+
+        self.submit_btn = tb.Button(self, 
+            text="Submit", 
+            bootstyle=SUCCESS, 
+            command=self.submit)
+        self.submit_btn.grid(row=6, column=1, pady=20)
 
         self.columnconfigure(1, weight=1)
 
@@ -86,8 +116,7 @@ class SecondPage(tb.Frame):
         super().__init__(parent, padding=20)
         self.controller = controller
 
-        tb.Label(self, text="Choose an option:", font=("Segoe UI", 14))
-        .pack(pady=10)
+        tb.Label(self, text="Choose an option:", font=("Segoe UI", 14)).pack(pady=10)
 
         tb.Button(self, text="Option 1", bootstyle=INFO, width=20, command=self.option1).pack(pady=5)
         tb.Button(self, text="Option 2", bootstyle=INFO, width=20, command=self.option2).pack(pady=5)
@@ -103,10 +132,11 @@ class App(tb.Window):
     def __init__(self):
         super().__init__(themename="flatly")
         self.title("AO MO SO Report Downloader")
+        self.geometry("435x350+700+300")
 
         container = tb.Frame(self)
         container.pack(fill=BOTH, expand=YES)
-
+        
         self.frames = {}
 
         for F in (FormPage, SecondPage):
